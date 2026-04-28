@@ -1,0 +1,2 @@
+from pymaneuvering.utils.example import test_turning_maneuver
+test_turning_maneuver()

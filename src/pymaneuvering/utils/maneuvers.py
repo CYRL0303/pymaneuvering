@@ -118,7 +118,7 @@ def plot_r(trajectories: Trajectories) -> None:
     plt.ylabel(r"$r(-)$", fontsize=14)
 
     plt.title(
-        "Yaw rate acceleration $r(-)$ for $\pm 35^{\circ}$ turning maneuver")
+        r"Yaw rate acceleration $r(-)$ for $\pm 35^{\circ}$ turning maneuver")
     plt.grid(True)
     plt.show()
 
@@ -208,53 +208,56 @@ def zigzag_maneuver(ivs: InitialValues, vessel: Vessel,
 
     for idx, depth in enumerate(wd):
 
-        uvr = reset_ivs
-        pos = np.array(vessel.pstep(
-                X=uvr,
-                pos=posTrue, True, True
+        uvr = reset_ivs.copy()
+        pos = np.array([0., 0.])
+        psi = 0.
+        delta = ivs.delta
+
+        first = True
+        second = True
+        third = True
+
         while True:
-            
             # Solve the ODE system for one second at a time
-            uvr, eta = pstep(
+            uvr, eta = vessel.pstep(
                 X=uvr,
                 pos=pos,
-                vessel=vessel,
                 dT=1,
-                psi=psi,
                 nps=ivs.nps,
                 delta=delta,
+                psi=psi,
                 fl_vel=None,
                 fl_psi=None,
+                w_vel=None,
+                beta_w=None,
                 water_depth=depth
             )
 
-            x,y,psi = eta
-            
-            pos = np.array([x,y])
-            
+            x, y, psi = eta
+            pos = np.array([x, y])
             psi = a2pm(psi)
 
             result[idx].append(float(psi))
             delta_list[idx].append(float(delta))
 
             if psi < max_deg*dir and first:
-                delta = min(delta+dps*dir,max_deg*dir)
+                delta = min(delta+dps*dir, max_deg*dir)
                 continue
             else:
                 first = False
 
             if psi > -max_deg*dir and second:
-                delta = max(delta-dps*dir,-max_deg*dir)
+                delta = max(delta-dps*dir, -max_deg*dir)
                 continue
             else:
                 second = False
 
             if psi < -max_deg*dir and third:
-                delta = min(delta+dps*dir,max_deg*dir)
+                delta = min(delta+dps*dir, max_deg*dir)
                 continue
             else:
                 third = False
-            
+
             if psi > 0.0:
                 break
         
@@ -278,15 +281,15 @@ def plot_zigzag(
     """
     
     ls = [(0, (3, 1, 1, 1, 1, 1)),"-"]
-    labels = ["h/d = $\infty$","h/d = 1.2"]
-    L = vessel.Lpp
+    labels = [r"h/d = $\infty$", r"h/d = 1.2"]
     if hasattr(vessel.vessel, "Lpp"):
         L = vessel.vessel.Lpp
     elif hasattr(vessel.vessel, "L"):
         L = vessel.vessel.L
     else:
-        raise AttributeError("Vessel object has no Lpp or L attribute")x(delta_list[0])
+        raise AttributeError("Vessel object has no Lpp or L attribute")
 
+    delta_max = int(max(max(abs(dl)) for dl in delta_list))
     fig = plt.figure(figsize=(8, 4))
 
     for i,v in enumerate(trajectories):
@@ -309,7 +312,7 @@ def plot_zigzag(
         )
 
     plt.xlabel("$t*U_0/L$", fontsize=18)
-    plt.ylabel("$Angle [^{\circ}]$", fontsize=18)
+    plt.ylabel(r"$Angle [^{\circ}]$", fontsize=18)
     plt.title(f"${int(delta_max)}/-{int(delta_max)}Z$",loc="left")
 
     plt.ylim(-40,40)

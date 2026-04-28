@@ -7,7 +7,7 @@ from pymaneuvering.utils.maneuvers import (
 from pymaneuvering.utils.common import InitialValues
 from pymaneuvering import Vessel, VTYPE # Dispatcher and Enum
 
-matplotlib.rcParams['font.family'] = ['Liberation Sans', 'sans-serif']
+matplotlib.rcParams['font.family'] = ['sans-serif']
 font = {'weight': 'normal','size': 14}
 matplotlib.rc('font', **font)
 
